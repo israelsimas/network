@@ -36,13 +36,13 @@
 
 #define SIZE_DATA_WAN       25
 
-#define PORT_WAN_STATTUS    "/sys/kernel/network_status/port_wan"
-
 #ifdef  PLATFORM_X86
+  #define PORT_WAN_STATTUS   "/tmp/port_wan"
   #define DEFAULT_INTERFACE  "enp1s0"     // eth for Ubuntu
   // #define DEFAULT_INTERFACE  "wlp3s0"  // Wireless for Ubuntu
   // #define DEFAULT_INTERFACE  en0"      // Wireless for MAC
 #else
+  #define PORT_WAN_STATTUS    "/sys/kernel/network_status/port_wan"
   #define DEFAULT_INTERFACE  "eth0"
 #endif
 
