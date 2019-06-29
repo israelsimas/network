@@ -17,10 +17,10 @@
  * DEFINITIONS
  **************************************************************************/
 
-#define SIZE_STR_MAC      40
-#define SIZE_STR_GATEWAY  40
-#define SIZE_MAX_MASK     50
-#define MAX_LINE_FILE_DNS 200
+#define SIZE_STR_MAC        40
+#define SIZE_STR_GATEWAY    40
+#define SIZE_MAX_MASK       50
+#define MAX_LINE_FILE_DNS   200
 
 #define INVALID_MAC         "00:00:00:00:00:00"
 #define INVALID_IP					"0.0.0.0"
@@ -38,10 +38,12 @@
 
 #define PORT_WAN_STATTUS    "/sys/kernel/network_status/port_wan"
 
-#if 1
-#define DEFAULT_INTERFACE "eth0"
+#ifdef  PLATFORM_X86
+  #define DEFAULT_INTERFACE  "enp1s0"     // eth for Ubuntu
+  // #define DEFAULT_INTERFACE  "wlp3s0"  // Wireless for Ubuntu
+  // #define DEFAULT_INTERFACE  en0"      // Wireless for MAC
 #else
-#define DEFAULT_INTERFACE "wlp3s0"
+  #define DEFAULT_INTERFACE  "eth0"
 #endif
 
 /**************************************************************************

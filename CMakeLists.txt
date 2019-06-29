@@ -9,6 +9,10 @@ if(APPLE)
   link_directories( /usr/local/lib/ )
 endif()
 
+IF(PLATFORM_X86)
+add_definitions(-DPLATFORM_X86)
+ENDIF(PLATFORM_X86)
+
 include_directories( lib/include/ )
 file(GLOB headers "lib/include/*.h" )
 file(GLOB sources "lib/src/*.c" )
