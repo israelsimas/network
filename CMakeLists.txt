@@ -15,4 +15,4 @@ file(GLOB sources "lib/src/*.c" )
 
 add_library(network SHARED ${sources} ${headers})
 
-target_link_libraries( network orcania )
+target_link_libraries( network orcania database )

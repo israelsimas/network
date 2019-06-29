@@ -34,9 +34,10 @@ char *getMac(char *pchInterface, int isUpper) {
 
   pchCommand = msprintf("/sbin/ifconfig %s | grep -o -E '([[:xdigit:]]{1,2}:){5}[[:xdigit:]]{1,2}'", pchInterface);
   pf = popen(pchCommand, "r");
+  o_free(pchCommand);
 	if (pf) {
 
-		pchMAC = malloc(sizeof(char) * SIZE_STR_MAC);
+		pchMAC = o_malloc(sizeof(char) * SIZE_STR_MAC);
 		memset(pchMAC, 0, SIZE_STR_MAC);
 		fgets(pchMAC, SIZE_STR_MAC, pf);
 
@@ -49,7 +50,7 @@ char *getMac(char *pchInterface, int isUpper) {
 
   if (isUpper) {
     int i;
-    for (i = 0; i < strlen(pchMAC); i++) {
+    for (i = 0; i < o_strlen(pchMAC); i++) {
       if (pchMAC[i] != ':') {
         pchMAC[i] = toupper(pchMAC[i]);
       }
@@ -139,7 +140,7 @@ char *getIfGateway(char *pchInterface, int isIPv6) {
 
 	if (pf) {
 
-		pchGateway = malloc(sizeof(char) * SIZE_STR_GATEWAY);
+		pchGateway = o_malloc(sizeof(char) * SIZE_STR_GATEWAY);
 		memset(pchGateway, 0, SIZE_STR_GATEWAY);
 		fgets(pchGateway, SIZE_STR_GATEWAY, pf);
 
@@ -237,29 +238,29 @@ char *addIPv6Brackets(char *pchIpAddr) {
 		return NULL;
 	}
 
-	if ((pchIpAddr[0] != '[') && (pchIpAddr[strlen(pchIpAddr) - 1] != ']')) {
-		lenAddr = strlen(pchIpAddr) + 3;
-		pchAddrBrackets = malloc(sizeof(char) * lenAddr);
+	if ((pchIpAddr[0] != '[') && (pchIpAddr[o_strlen(pchIpAddr) - 1] != ']')) {
+		lenAddr = o_strlen(pchIpAddr) + 3;
+		pchAddrBrackets = o_malloc(sizeof(char) * lenAddr);
 		memset(pchAddrBrackets, 0, lenAddr);
-		strcpy(pchAddrBrackets, "[");
+		o_strcpy(pchAddrBrackets, "[");
 		strcat(pchAddrBrackets, pchIpAddr);
 		strcat(pchAddrBrackets, "]");
 
 		return pchAddrBrackets;
-	} else if ((pchIpAddr[0] != '[') && (pchIpAddr[strlen(pchIpAddr) - 1] == ']')) {
-			lenAddr = strlen(pchIpAddr) + 2;
-			pchAddrBrackets = malloc(sizeof(char) * lenAddr);
+	} else if ((pchIpAddr[0] != '[') && (pchIpAddr[o_strlen(pchIpAddr) - 1] == ']')) {
+			lenAddr = o_strlen(pchIpAddr) + 2;
+			pchAddrBrackets = o_malloc(sizeof(char) * lenAddr);
 			memset(pchAddrBrackets, 0, lenAddr);
-			strcpy(pchAddrBrackets, "[");
+			o_strcpy(pchAddrBrackets, "[");
 			strcat(pchAddrBrackets, pchIpAddr);
 
 			return pchAddrBrackets;
 
-	} else if ((pchIpAddr[0] == '[') && (pchIpAddr[strlen(pchIpAddr) - 1] != ']')) {
-			lenAddr = strlen(pchIpAddr) + 2;
-			pchAddrBrackets = malloc(sizeof(char) * lenAddr);
+	} else if ((pchIpAddr[0] == '[') && (pchIpAddr[o_strlen(pchIpAddr) - 1] != ']')) {
+			lenAddr = o_strlen(pchIpAddr) + 2;
+			pchAddrBrackets = o_malloc(sizeof(char) * lenAddr);
 			memset(pchAddrBrackets, 0, lenAddr);
-			strcpy(pchAddrBrackets, pchIpAddr);
+			o_strcpy(pchAddrBrackets, pchIpAddr);
 			strcat(pchAddrBrackets, "]");
 
 			return pchAddrBrackets;
@@ -270,18 +271,18 @@ char *addIPv6Brackets(char *pchIpAddr) {
 
 char *removeBracketsAddr(char *pchIpAddress) {
 
-	char *pchIpAddr = strdup(pchIpAddress);
+	char *pchIpAddr = o_strdup(pchIpAddress);
 
 	if (!pchIpAddr) {
 		return NULL;
 	}
 
 	if (pchIpAddr[0] == '[') {
-		memmove(pchIpAddr, pchIpAddr+1, strlen(pchIpAddr));
+		memmove(pchIpAddr, pchIpAddr+1, o_strlen(pchIpAddr));
 	}
 
-	if (pchIpAddr[strlen(pchIpAddr) -1] == ']') {
-		pchIpAddr[strlen(pchIpAddr) -1] = '\0';
+	if (pchIpAddr[o_strlen(pchIpAddr) -1] == ']') {
+		pchIpAddr[o_strlen(pchIpAddr) -1] = '\0';
 	}
 
 	return pchIpAddr;
@@ -318,7 +319,7 @@ E_IP_ADDR_TYPE getIPAddrType(char *pchIpAddress) {
 
 	ret = getaddrinfo(pchIpAddr, NULL, &hint, &pResult);
 	if (ret) {
-		free(pchIpAddr);
+		o_free(pchIpAddr);
 		return IP_ADDR_TYPE_NONE;
 	}
 
@@ -339,7 +340,132 @@ E_IP_ADDR_TYPE getIPAddrType(char *pchIpAddress) {
 	}
 
 	freeaddrinfo(pResult);
-	free(pchIpAddr);
+	o_free(pchIpAddr);
 
 	return type;
+}
+
+int getInterfaceType(char *pchInterface, int isIPv6, struct _db_connection *pConnDB) {
+
+  char *pchQuery, *pchTable, *pchParamDHCP;
+  int interfaceType = 0;
+  struct _db_result result;
+
+  if (!o_strcmp(pchInterface, DEFAULT_INTERFACE)) {
+    pchTable = "TAB_NET_ETH_WAN";
+    if (isIPv6) {
+      pchParamDHCP = "ETHActivateDHCPClientIPv6";      
+    } else {
+      pchParamDHCP = "ETHActivateDHCPClient";
+    }
+  } else {
+    pchTable = "TAB_NET_VLAN";
+    if (isIPv6) {
+      pchParamDHCP = "VLANActivateDHCPClientIPv6";      
+    } else {
+      pchParamDHCP = "VLANActivateDHCPClient"; 
+    }
+  }
+
+  pchQuery = msprintf("SELECT GROUP_CONCAT( %s, ',' ) as dhcp FROM %s", pchParamDHCP, pchTable);
+  if (db_query_select(pConnDB, pchQuery, &result) == DATABASE_OK) {
+    if (result.nb_rows == 1 && result.nb_columns == 1) {
+      interfaceType = ((struct _db_type_int *)result.data[0][0].t_data)->value;
+    }
+  } 
+
+  o_free(pchQuery);
+
+  return interfaceType;
+}
+
+int isWANConnected() {
+
+  FILE *fp;
+  int handleFile, bConnected;
+  char pchStatusFile[100];
+  char pchData[SIZE_DATA_WAN] = {'\0'};
+
+  bConnected = 1;
+  sprintf(pchStatusFile, PORT_WAN_STATTUS);
+
+  fp = fopen(pchStatusFile, "r");
+  if (fp == NULL) {
+    return bConnected;
+  }
+
+  fseek(fp, 0, SEEK_SET);
+
+  if (fread(pchData, sizeof(char), SIZE_DATA_WAN, fp) > 0) {
+    if (o_strstr(pchData, "1")) {
+      bConnected = 1;
+    } else {
+      bConnected = 0;
+    }
+  }
+
+  fclose(fp);
+
+  return bConnected;
+}
+
+int getWanStatus(struct _db_connection *pConnDB) {
+
+  char *pchIpAddr = getIfaddr(DEFAULT_INTERFACE, AF_INET);
+
+  if (pchIpAddr && (o_strcmp(pchIpAddr, INVALID_IP) != 0)) {
+
+    o_free(pchIpAddr);
+    return 1;
+  } else {
+
+    int bVlanActive, VlanSIP, VlanRTP, bVLANAutoEnable, bVLANAutoConfigured, VLANAutoID;
+    struct _db_result result;
+    char *pchInterface;
+
+    bVlanActive         = 0;
+    VlanSIP             = 0;
+    VlanRTP             = 0;
+    bVLANAutoEnable     = 0;
+    bVLANAutoConfigured = 0;
+    o_free(pchIpAddr);
+
+    if (db_query_select(pConnDB, "SELECT VLANActivate, VLANTrafficEnableSIP, VLANTrafficEnableRTP, VLANAutoEnable, VLANAutoConfigured, VLANAutoID from TAB_NET_VLAN", &result) == DATABASE_OK) {
+      int numColumn = 0;
+
+      getDbResult(result, numColumn++, &bVlanActive);
+      getDbResult(result, numColumn++, &VlanSIP);
+      getDbResult(result, numColumn++, &VlanRTP);
+      getDbResult(result, numColumn++, &bVLANAutoEnable);
+      getDbResult(result, numColumn++, &bVLANAutoConfigured);
+      getDbResult(result, numColumn++, &VLANAutoID);
+    }
+
+    if (bVlanActive) {
+
+      pchInterface = msprintf("%s.%d", DEFAULT_INTERFACE, VlanSIP);
+      pchIpAddr    = getIfaddr(pchInterface, AF_INET);
+      o_free(pchInterface);
+      if (pchIpAddr && (strcmp(pchIpAddr, INVALID_IP) != 0)) {
+        o_free(pchIpAddr);
+        return 1;
+      } else {
+        return 0;
+      }
+
+    } else if (bVLANAutoEnable && bVLANAutoConfigured) {
+
+      pchInterface = msprintf("%s.%d", DEFAULT_INTERFACE, VLANAutoID);
+      pchIpAddr = getIfaddr(DEFAULT_INTERFACE, AF_INET);
+      o_free(pchInterface);
+      if (pchIpAddr && (o_strcmp(pchIpAddr, INVALID_IP) != 0)) {
+        o_free(pchIpAddr);
+        return 1;
+      } else {
+        return 0;
+      }
+    }
+    
+    return 0;
+  }
 }

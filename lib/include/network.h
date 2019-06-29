@@ -11,6 +11,7 @@
 #ifndef __NETWORK_H__
 #define __NETWORK_H__
 
+#include <database.h>
 
 /**************************************************************************
  * DEFINITIONS
@@ -30,8 +31,18 @@
 #define IPV4_LOCAL_DEFAULT  "127.0.0.1"
 #define IPV6_LOCAL_DEFAULT	"::1"
 
-#define NUM_MAX_RESOLV					3
-#define NAMESERVER_RESOLV				"nameserver"
+#define NUM_MAX_RESOLV			3
+#define NAMESERVER_RESOLV		"nameserver"
+
+#define SIZE_DATA_WAN       25
+
+#define PORT_WAN_STATTUS    "/sys/kernel/network_status/port_wan"
+
+#if 1
+#define DEFAULT_INTERFACE "eth0"
+#else
+#define DEFAULT_INTERFACE "wlp3s0"
+#endif
 
 /**************************************************************************
  * TYPEDEFS
@@ -105,5 +116,11 @@ char *addIPv6Brackets(char *pchIpAddr);
 char *removeBracketsAddr(char *pchIpAddress);
 
 E_IP_ADDR_TYPE getIPAddrType(char *pchIpAddress);
+
+int getInterfaceType(char *pchInterface, int isIPv6, struct _db_connection *pConnDB);
+
+int isWANConnected();
+
+int getWanStatus(struct _db_connection *pConnDB);
 
 #endif
