@@ -127,4 +127,6 @@ int isWANConnected();
 
 int getWanStatus(struct _db_connection *pConnDB);
 
+E_PROTOCOL_MODE getProtocolMode(struct _db_connection *pConnDB);
+
 #endif

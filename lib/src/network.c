@@ -482,3 +482,18 @@ int getWanStatus(struct _db_connection *pConnDB) {
     return 0;
   }
 }
+
+E_PROTOCOL_MODE getProtocolMode(struct _db_connection *pConnDB) {
+
+	struct _db_result result;
+	char *pchParam = NULL;
+	unsigned long dwMode = PROT_MODE_IPV4;
+
+  if (db_query_select(pConnDB, "SELECT ETHProtocolMode from TAB_NET_ETH_WAN", &result) == DATABASE_OK) {
+    int numColumn = 0;
+
+    getDbResult(result, numColumn++, &dwMode);
+  }
+
+	return dwMode;
+}
