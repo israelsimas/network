@@ -22,6 +22,13 @@
 #define SIZE_MAX_MASK       50
 #define MAX_LINE_FILE_DNS   200
 
+#define MAX_LENGTH_ETH_STATUS 		25
+#define MAX_LENGHT_CMD_DUPL				60
+#define SIZE_STR_IPV6      				50
+
+#define ARPING_COMMAND					  "arping -D -I %s -c 2 %s"
+#define IP_ADDRESS_NOT_DUPLICATED	0
+
 #define INVALID_MAC         "00:00:00:00:00:00"
 #define INVALID_IP					"0.0.0.0"
 #define DEFAULT_MASK_ADDR   "255.255.255.0"

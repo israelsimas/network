@@ -497,3 +497,49 @@ E_PROTOCOL_MODE getProtocolMode(struct _db_connection *pConnDB) {
 
 	return dwMode;
 }
+
+int isValidIPv4Addr(char *pchInterface) {
+  char *pchIPAddress;
+
+  pchIPAddress = getIfaddr(pchInterface, AF_INET);
+  if (pchIPAddress) {
+    o_free(pchIPAddress);
+  	return 1;
+  } else {
+  	return 0;
+  }
+}
+
+int isValidIPv6Addr(char *pchInterface) {
+  char *pchIPAddress;
+
+  pchIPAddress = getIfaddr(pchInterface, AF_INET6);
+  if (pchIPAddress) {
+    o_free(pchIPAddress);
+  	return 1;
+  } else {
+  	return 0;
+  }
+}
+
+int isIPv4Duplicated(char *pchInterface) {
+  char *pchIPAddress, *pchCmdDuplicate;
+  int statusDuplicate, status;
+
+  status = 0;
+  pchIPAddress = getIfaddr(pchInterface, AF_INET);
+  if (pchIPAddress) {
+    pchCmdDuplicate = msprintf(ARPING_COMMAND, pchInterface, pchIPAddress);
+  	statusDuplicate = system(pchCmdDuplicate);
+  	if (statusDuplicate == 256) {
+  		status = 1;
+  	} else {
+  		status = 0;
+  	}
+  }
+
+  o_free(pchIPAddress);
+  o_free(pchCmdDuplicate);
+
+  return status;
+}
