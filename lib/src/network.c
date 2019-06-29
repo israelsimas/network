@@ -379,6 +379,19 @@ int getInterfaceType(char *pchInterface, int isIPv6, struct _db_connection *pCon
   return interfaceType;
 }
 
+int isLocalAddrIpv6(char *pchInterfaceIP) {
+
+  int bIsLocalAddr = 0;
+
+  if (pchInterfaceIP) {
+    size_t lenpre = strlen(PREFIX_LOCAL_IPV6),
+    lenstr = strlen(pchInterfaceIP);
+    bIsLocalAddr = lenstr < lenpre ? 0 : strncmp(PREFIX_LOCAL_IPV6, pchInterfaceIP, lenpre) == 0;
+  }
+
+  return bIsLocalAddr;
+}
+
 int isWANConnected() {
 
   FILE *fp;

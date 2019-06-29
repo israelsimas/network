@@ -121,6 +121,8 @@ E_IP_ADDR_TYPE getIPAddrType(char *pchIpAddress);
 
 int getInterfaceType(char *pchInterface, int isIPv6, struct _db_connection *pConnDB);
 
+int isLocalAddrIpv6(char *pchInterfaceIP);
+
 int isWANConnected();
 
 int getWanStatus(struct _db_connection *pConnDB);
