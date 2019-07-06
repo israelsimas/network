@@ -20,3 +20,6 @@ file(GLOB sources "lib/src/*.c" )
 add_library(network SHARED ${sources} ${headers})
 
 target_link_libraries( network orcania database )
+
+install(TARGETS network DESTINATION /usr/local/lib)
+install(FILES "lib/include/network.h" DESTINATION /usr/local/include)
