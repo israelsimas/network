@@ -21,5 +21,14 @@ add_library(network SHARED ${sources} ${headers})
 
 target_link_libraries( network orcania database )
 
+set (VERSION 1.0.0)
+add_definitions (-DCMAKE -DVERSION=\"${VERSION}\")
+
+set_target_properties(network PROPERTIES
+	OUTPUT_NAME network
+	VERSION ${VERSION}
+	SOVERSION 1
+)
+
 install(TARGETS network DESTINATION /usr/local/lib)
 install(FILES "lib/include/network.h" DESTINATION /usr/local/include)
