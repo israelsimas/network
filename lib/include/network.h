@@ -26,6 +26,8 @@
 #define MAX_LENGHT_CMD_DUPL				60
 #define SIZE_STR_IPV6      				50
 
+#define CMD_RESTART_NETWORK 			"/etc/init.d/network restart"
+
 #define ARPING_COMMAND					  "arping -D -I %s -c 2 %s"
 #define IP_ADDRESS_NOT_DUPLICATED	0
 
@@ -52,6 +54,10 @@
   #define PORT_WAN_STATTUS    "/sys/kernel/network_status/port_wan"
   #define DEFAULT_INTERFACE   "eth0"
 #endif
+
+#define MAX_LENGTH_CABLE_STATUS   2
+
+#define AUTO_VLAN_VALID_FILE		"/tmp/inputValid"
 
 /**************************************************************************
  * TYPEDEFS
@@ -83,17 +89,17 @@ typedef enum {
  * @enum E_CABLE_STATUS
  */
 typedef enum {
-	CABLE_CONNECTED = 0x00,
 	CABLE_DISCONNECTED,
+	CABLE_CONNECTED,
 } E_CABLE_STATUS;
 
 /*
  * @enum E_ETH_STATUS
  */
-typedef enum {
-	ETH_LINK_STATUS_UP 		= 0x00,
+typedef enum {	
+  ETH_LINK_STATUS_IP_DUPLICATED = -1,
 	ETH_LINK_STATUS_DOWN,
-	ETH_LINK_STATUS_IP_DUPLICATED,
+	ETH_LINK_STATUS_UP,  
 } E_ETH_LINK_STATUS;
 
 /*
@@ -104,36 +110,59 @@ typedef enum {
 	ETH_FULL,
 } E_ETH_MODE;
 
+/**
+ * 	@enum E_INTERFACE_TYPE
+ */
+typedef enum {
+	IF_WAN,
+	IF_VLAN,
+	IF_AUTO_VLAN,
+} E_INTERFACE_TYPE;
+
 /**************************************************************************
  * INTERNAL CALL FUNCTIONS
  **************************************************************************/
 
-char *getMac(char *pchInterface, int isUpper);
+char *ntw_getMac(char *pchInterface, int isUpper);
 
-char *getIfaddr(char *pchInterface, int typeINET);
+char *ntw_getIfaddr(char *pchInterface, int typeINET);
 
-char *getMaskAddr(char *pchInterface, int typeINET);
+char *ntw_getMaskAddr(char *pchInterface, int typeINET);
 
-char *getIfGateway(char *pchInterface, int isIPv6);
+char *ntw_getIfGateway(char *pchInterface, int isIPv6);
 
-void get_dns_servers(char **ppchDns1, char **ppchDns2, int isIPv6);
+void ntw_getDnsServers(char **ppchDns1, char **ppchDns2, int isIPv6);
 
-long getHostAddr(unsigned long *pdwAddr, char *pchName);
+long ntw_getHostAddr(unsigned long *pdwAddr, char *pchName);
 
-char *addIPv6Brackets(char *pchIpAddr);
+char *ntw_addIPv6Brackets(char *pchIpAddr);
 
-char *removeBracketsAddr(char *pchIpAddress);
+char *ntw_removeBracketsAddr(char *pchIpAddress);
 
-E_IP_ADDR_TYPE getIPAddrType(char *pchIpAddress);
+E_IP_ADDR_TYPE ntw_getIPAddrType(char *pchIpAddress);
 
-int getInterfaceType(char *pchInterface, int isIPv6, struct _db_connection *pConnDB);
+int ntw_getInterfaceType(char *pchInterface, int isIPv6, struct _db_connection *pConnDB);
 
-int isLocalAddrIpv6(char *pchInterfaceIP);
+int ntw_isLocalAddrIpv6(char *pchInterfaceIP);
 
-int isWANConnected();
+int ntw_isWANConnected();
 
-int getWanStatus(struct _db_connection *pConnDB);
+int ntw_getWanStatus(struct _db_connection *pConnDB);
 
-E_PROTOCOL_MODE getProtocolMode(struct _db_connection *pConnDB);
+E_PROTOCOL_MODE ntw_getProtocolMode(struct _db_connection *pConnDB);
+
+int ntw_isValidIPv4Addr(char *pchInterfaceName);
+
+int ntw_isValidIPv6Addr(char *pchInterfaceName);
+
+int ntw_isIPv4Duplicated(char *pchInterfaceName);
+
+E_INTERFACE_TYPE ntw_getActiveInterface(struct _db_connection *pConnDB);
+
+char *ntw_getActiveInterfaceName(struct _db_connection *pConnDB);
+
+E_CABLE_STATUS ntw_getCableStatus();
+
+void ntw_restartNetworkConfig();
 
 #endif
