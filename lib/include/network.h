@@ -123,46 +123,46 @@ typedef enum {
  * INTERNAL CALL FUNCTIONS
  **************************************************************************/
 
-char *ntw_getMac(char *pchInterface, int isUpper);
+char *ntw_get_mac(char *pchInterface, int isUpper);
 
-char *ntw_getIfaddr(char *pchInterface, int typeINET);
+char *ntw_get_if_addr(char *pchInterface, int typeINET);
 
-char *ntw_getMaskAddr(char *pchInterface, int typeINET);
+char *ntw_get_mask_addr(char *pchInterface, int typeINET);
 
-char *ntw_getIfGateway(char *pchInterface, int isIPv6);
+char *ntw_get_if_gateway(char *pchInterface, int isIPv6);
 
-void ntw_getDnsServers(char **ppchDns1, char **ppchDns2, int isIPv6);
+void ntw_get_dns_servers(char **ppchDns1, char **ppchDns2, int isIPv6);
 
-long ntw_getHostAddr(unsigned long *pdwAddr, char *pchName);
+long ntw_get_host_addr(unsigned long *pdwAddr, char *pchName);
 
-char *ntw_addIPv6Brackets(char *pchIpAddr);
+char *ntw_addr_IPv6_brackets(char *pchIpAddr);
 
-char *ntw_removeBracketsAddr(char *pchIpAddress);
+char *ntw_remove_brackets_addr(char *pchIpAddress);
 
-E_IP_ADDR_TYPE ntw_getIPAddrType(char *pchIpAddress);
+E_IP_ADDR_TYPE ntw_get_IPAddr_type(char *pchIpAddress);
 
-int ntw_getInterfaceType(char *pchInterface, int isIPv6, struct _db_connection *pConnDB);
+int ntw_get_interface_type(char *pchInterface, int isIPv6, struct _db_connection *pConnDB);
 
-int ntw_isLocalAddrIpv6(char *pchInterfaceIP);
+int ntw_is_local_addr_ipv6(char *pchInterfaceIP);
 
-int ntw_isWANConnected();
+int ntw_is_WAN_connected();
 
-int ntw_getWanStatus(struct _db_connection *pConnDB);
+int ntw_get_WAN_status(struct _db_connection *pConnDB);
 
-E_PROTOCOL_MODE ntw_getProtocolMode(struct _db_connection *pConnDB);
+E_PROTOCOL_MODE ntw_get_protocol_mode(struct _db_connection *pConnDB);
 
-int ntw_isValidIPv4Addr(char *pchInterfaceName);
+int ntw_is_valid_IPv4_addr(char *pchInterfaceName);
 
-int ntw_isValidIPv6Addr(char *pchInterfaceName);
+int ntw_is_valid_IPv6_addr(char *pchInterfaceName);
 
-int ntw_isIPv4Duplicated(char *pchInterfaceName);
+int ntw_is_IPv4_duplicated(char *pchInterfaceName);
 
-E_INTERFACE_TYPE ntw_getActiveInterface(struct _db_connection *pConnDB);
+E_INTERFACE_TYPE ntw_get_active_interface(struct _db_connection *pConnDB);
 
-char *ntw_getActiveInterfaceName(struct _db_connection *pConnDB);
+char *ntw_get_active_interface_name(struct _db_connection *pConnDB);
 
-E_CABLE_STATUS ntw_getCableStatus();
+E_CABLE_STATUS ntw_get_cable_status();
 
-void ntw_restartNetworkConfig();
+void ntw_restart_network();
 
 #endif

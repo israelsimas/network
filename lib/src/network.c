@@ -21,7 +21,7 @@
 
 #define THIS_FILE "network.c"
 
-char *ntw_getMac(char *pchInterface, int isUpper) {
+char *ntw_get_mac(char *pchInterface, int isUpper) {
 
   char *pchMAC = NULL;
 	char *pchCommand;
@@ -60,7 +60,7 @@ char *ntw_getMac(char *pchInterface, int isUpper) {
   return pchMAC;
 }
 
-char *ntw_getIfaddr(char *pchInterface, int typeINET) {
+char *ntw_get_if_addr(char *pchInterface, int typeINET) {
 	struct ifaddrs *ifap, *ifa;
   char pchAddr[INET6_ADDRSTRLEN];
   char *pchIpAddr = NULL;
@@ -88,7 +88,7 @@ char *ntw_getIfaddr(char *pchInterface, int typeINET) {
 	return o_strdup(INVALID_IP);
 }
 
-char *ntw_getMaskAddr(char *pchInterface, int typeINET) {
+char *ntw_get_mask_addr(char *pchInterface, int typeINET) {
 	struct ifaddrs *ifap, *ifa;
   char *pchAddr = NULL;
 
@@ -125,7 +125,7 @@ char *ntw_getMaskAddr(char *pchInterface, int typeINET) {
 	return pchAddr;
 }
 
-char *ntw_getIfGateway(char *pchInterface, int isIPv6) {
+char *ntw_get_if_gateway(char *pchInterface, int isIPv6) {
 
   char *pchGateway = NULL;
 	FILE *pf;
@@ -154,7 +154,7 @@ char *ntw_getIfGateway(char *pchInterface, int isIPv6) {
   return pchGateway;
 }
 
-void ntw_getDnsServers(char **ppchDns1, char **ppchDns2, int isIPv6) {
+void ntw_get_dns_servers(char **ppchDns1, char **ppchDns2, int isIPv6) {
   FILE *pf;
   char line[MAX_LINE_FILE_DNS] , *pchDNS;
   int bDNS1 = 1;
@@ -192,7 +192,7 @@ void ntw_getDnsServers(char **ppchDns1, char **ppchDns2, int isIPv6) {
   pclose(pf);
 }
 
-long ntw_getHostAddr(unsigned long *pdwAddr, char *pchName) {
+long ntw_get_host_addr(unsigned long *pdwAddr, char *pchName) {
 	long status = 0;
 	unsigned long dwAddr;
 
@@ -229,7 +229,7 @@ long ntw_getHostAddr(unsigned long *pdwAddr, char *pchName) {
 	return status;
 }
 
-char *ntw_addIPv6Brackets(char *pchIpAddr) {
+char *ntw_add_IPv6_brackets(char *pchIpAddr) {
 
 	char *pchAddrBrackets = NULL;
 	int lenAddr = 0;
@@ -269,7 +269,7 @@ char *ntw_addIPv6Brackets(char *pchIpAddr) {
 	}
 }
 
-char *ntw_removeBracketsAddr(char *pchIpAddress) {
+char *ntw_remove_brackets_addr(char *pchIpAddress) {
 
 	char *pchIpAddr = o_strdup(pchIpAddress);
 
@@ -288,7 +288,7 @@ char *ntw_removeBracketsAddr(char *pchIpAddress) {
 	return pchIpAddr;
 }
 
-E_IP_ADDR_TYPE ntw_getIPAddrType(char *pchIpAddress) {
+E_IP_ADDR_TYPE ntw_get_IPAddr_type(char *pchIpAddress) {
 
 	struct in_addr sin_addr;
 	struct in6_addr sin6_addr;
@@ -296,7 +296,7 @@ E_IP_ADDR_TYPE ntw_getIPAddrType(char *pchIpAddress) {
 	int ret;
 	int bHasIPv4, bHasIPv6;
 	E_IP_ADDR_TYPE type = IP_ADDR_TYPE_NONE;
-	char *pchIpAddr 		= ntw_removeBracketsAddr(pchIpAddress);
+	char *pchIpAddr 		= ntw_remove_brackets_addr(pchIpAddress);
 
 	if (!pchIpAddr) {
 		return type;
@@ -345,7 +345,7 @@ E_IP_ADDR_TYPE ntw_getIPAddrType(char *pchIpAddress) {
 	return type;
 }
 
-int ntw_getInterfaceType(char *pchInterface, int isIPv6, struct _db_connection *pConnDB) {
+int ntw_get_interface_type(char *pchInterface, int isIPv6, struct _db_connection *pConnDB) {
 
   char *pchQuery, *pchTable, *pchParamDHCP;
   int interfaceType = 0;
@@ -379,7 +379,7 @@ int ntw_getInterfaceType(char *pchInterface, int isIPv6, struct _db_connection *
   return interfaceType;
 }
 
-int ntw_isLocalAddrIpv6(char *pchInterfaceIP) {
+int ntw_is_local_addr_Ipv6(char *pchInterfaceIP) {
 
   int bIsLocalAddr = 0;
 
@@ -392,7 +392,7 @@ int ntw_isLocalAddrIpv6(char *pchInterfaceIP) {
   return bIsLocalAddr;
 }
 
-int ntw_isWANConnected() {
+int ntw_is_WAN_connected() {
 
   FILE *fp;
   int handleFile, bConnected;
@@ -422,9 +422,9 @@ int ntw_isWANConnected() {
   return bConnected;
 }
 
-int ntw_getWanStatus(struct _db_connection *pConnDB) {
+int ntw_get_WAN_status(struct _db_connection *pConnDB) {
 
-  char *pchIpAddr = ntw_getIfaddr(DEFAULT_INTERFACE, AF_INET);
+  char *pchIpAddr = ntw_get_if_addr(DEFAULT_INTERFACE, AF_INET);
 
   if (pchIpAddr && (o_strcmp(pchIpAddr, INVALID_IP) != 0)) {
 
@@ -457,7 +457,7 @@ int ntw_getWanStatus(struct _db_connection *pConnDB) {
     if (bVlanActive) {
 
       pchInterface = msprintf("%s.%d", DEFAULT_INTERFACE, VlanSIP);
-      pchIpAddr    = ntw_getIfaddr(pchInterface, AF_INET);
+      pchIpAddr    = ntw_get_if_addr(pchInterface, AF_INET);
       o_free(pchInterface);
       if (pchIpAddr && (strcmp(pchIpAddr, INVALID_IP) != 0)) {
         o_free(pchIpAddr);
@@ -469,7 +469,7 @@ int ntw_getWanStatus(struct _db_connection *pConnDB) {
     } else if (bVLANAutoEnable && bVLANAutoConfigured) {
 
       pchInterface = msprintf("%s.%d", DEFAULT_INTERFACE, VLANAutoID);
-      pchIpAddr = ntw_getIfaddr(DEFAULT_INTERFACE, AF_INET);
+      pchIpAddr = ntw_get_if_addr(DEFAULT_INTERFACE, AF_INET);
       o_free(pchInterface);
       if (pchIpAddr && (o_strcmp(pchIpAddr, INVALID_IP) != 0)) {
         o_free(pchIpAddr);
@@ -483,7 +483,7 @@ int ntw_getWanStatus(struct _db_connection *pConnDB) {
   }
 }
 
-E_PROTOCOL_MODE ntw_getProtocolMode(struct _db_connection *pConnDB) {
+E_PROTOCOL_MODE ntw_get_protocol_mode(struct _db_connection *pConnDB) {
 
 	struct _db_result result;
 	unsigned long dwMode = PROT_MODE_IPV4;
@@ -497,10 +497,10 @@ E_PROTOCOL_MODE ntw_getProtocolMode(struct _db_connection *pConnDB) {
 	return dwMode;
 }
 
-int ntw_isValidIPv4Addr(char *pchInterfaceName) {
+int ntw_is_valid_IPv4_addr(char *pchInterfaceName) {
   char *pchIPAddress;
 
-  pchIPAddress = ntw_getIfaddr(pchInterfaceName, AF_INET);
+  pchIPAddress = ntw_get_if_addr(pchInterfaceName, AF_INET);
   if (pchIPAddress) {
     o_free(pchIPAddress);
   	return 1;
@@ -509,10 +509,10 @@ int ntw_isValidIPv4Addr(char *pchInterfaceName) {
   }
 }
 
-int ntw_isValidIPv6Addr(char *pchInterfaceName) {
+int ntw_is_valid_IPv6_addr(char *pchInterfaceName) {
   char *pchIPAddress;
 
-  pchIPAddress = ntw_getIfaddr(pchInterfaceName, AF_INET6);
+  pchIPAddress = ntw_get_if_addr(pchInterfaceName, AF_INET6);
   if (pchIPAddress) {
     o_free(pchIPAddress);
   	return 1;
@@ -521,12 +521,12 @@ int ntw_isValidIPv6Addr(char *pchInterfaceName) {
   }
 }
 
-int ntw_isIPv4Duplicated(char *pchInterfaceName) {
+int ntw_is_IPv4_duplicated(char *pchInterfaceName) {
   char *pchIPAddress, *pchCmdDuplicate;
   int statusDuplicate, status;
 
   status = 0;
-  pchIPAddress = ntw_getIfaddr(pchInterfaceName, AF_INET);
+  pchIPAddress = ntw_get_if_addr(pchInterfaceName, AF_INET);
   if (pchIPAddress) {
     pchCmdDuplicate = msprintf(ARPING_COMMAND, pchInterfaceName, pchIPAddress);
   	statusDuplicate = system(pchCmdDuplicate);
@@ -543,7 +543,7 @@ int ntw_isIPv4Duplicated(char *pchInterfaceName) {
   return status;
 }
 
-E_INTERFACE_TYPE ntw_getActiveInterface(struct _db_connection *pConnDB) {
+E_INTERFACE_TYPE ntw_get_active_interface(struct _db_connection *pConnDB) {
   
   struct _db_result result;
 	int bVlanActive, bVlanAutoEnable, bVlanAutoConfigured;
@@ -576,11 +576,11 @@ E_INTERFACE_TYPE ntw_getActiveInterface(struct _db_connection *pConnDB) {
   return eIfType;
 }
 
-char *ntw_getActiveInterfaceName(struct _db_connection *pConnDB) {
+char *ntw_get_active_interface_name(struct _db_connection *pConnDB) {
 
   char *pchInterfaceName;
 
-  switch (ntw_getActiveInterface(pConnDB)) {
+  switch (ntw_get_active_interface(pConnDB)) {
 
     case IF_WAN:
       pchInterfaceName = o_strdup(DEFAULT_INTERFACE);
@@ -620,7 +620,7 @@ char *ntw_getActiveInterfaceName(struct _db_connection *pConnDB) {
   return pchInterfaceName;
 }
 
-E_CABLE_STATUS ntw_getCableStatus() {
+E_CABLE_STATUS ntw_get_cable_status() {
   FILE *pf;
   int handleFile, cableConn;
   char pchCableStatus[MAX_LENGTH_CABLE_STATUS];
@@ -648,6 +648,6 @@ E_CABLE_STATUS ntw_getCableStatus() {
   return cableConn;
 }
 
-void ntw_restartNetworkConfig() {
+void ntw_restart_network() {
   system(CMD_RESTART_NETWORK);
 }
