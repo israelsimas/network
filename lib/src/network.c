@@ -60,11 +60,16 @@ char *ntw_get_mac(char *pchInterface, int isUpper) {
   return pchMAC;
 }
 
-char *ntw_get_if_addr(char *pchInterface, int typeINET) {
+char *ntw_get_if_addr(char *pchInterface, int isIPv6) {
 
 	struct ifaddrs *ifap, *ifa;
   char pchAddr[INET6_ADDRSTRLEN];
   char *pchIpAddr = NULL;
+  int typeINET    = AF_INET;
+
+  if (isIPv6) {
+    typeINET = AF_INET6;
+  }  
 
   getifaddrs (&ifap);
   for (ifa = ifap; ifa; ifa = ifa->ifa_next) {
@@ -89,10 +94,15 @@ char *ntw_get_if_addr(char *pchInterface, int typeINET) {
 	return o_strdup(INVALID_IP);
 }
 
-char *ntw_get_mask_addr(char *pchInterface, int typeINET) {
+char *ntw_get_mask_addr(char *pchInterface, int isIPv6) {
 
 	struct ifaddrs *ifap, *ifa;
   char *pchAddr = NULL;
+  int typeINET  = AF_INET;
+
+  if (isIPv6) {
+    typeINET = AF_INET6;
+  }
 
   getifaddrs(&ifap);
   for (ifa = ifap; ifa; ifa = ifa->ifa_next) {
@@ -233,43 +243,43 @@ long ntw_get_host_addr(unsigned long *pdwAddr, char *pchName) {
 	return status;
 }
 
-char *ntw_add_IPv6_brackets(char *pchIpAddr) {
+char *ntw_addr_IPv6_brackets(char *pchIpAddress) {
 
 	char *pchAddrBrackets = NULL;
 	int lenAddr = 0;
 
-	if (!pchIpAddr) {
+	if (!pchIpAddress) {
 		return NULL;
 	}
 
-	if ((pchIpAddr[0] != '[') && (pchIpAddr[o_strlen(pchIpAddr) - 1] != ']')) {
-		lenAddr = o_strlen(pchIpAddr) + 3;
+	if ((pchIpAddress[0] != '[') && (pchIpAddress[o_strlen(pchIpAddress) - 1] != ']')) {
+		lenAddr = o_strlen(pchIpAddress) + 3;
 		pchAddrBrackets = o_malloc(sizeof(char) * lenAddr);
 		memset(pchAddrBrackets, 0, lenAddr);
 		o_strcpy(pchAddrBrackets, "[");
-		strcat(pchAddrBrackets, pchIpAddr);
+		strcat(pchAddrBrackets, pchIpAddress);
 		strcat(pchAddrBrackets, "]");
 
 		return pchAddrBrackets;
-	} else if ((pchIpAddr[0] != '[') && (pchIpAddr[o_strlen(pchIpAddr) - 1] == ']')) {
-			lenAddr = o_strlen(pchIpAddr) + 2;
+	} else if ((pchIpAddress[0] != '[') && (pchIpAddress[o_strlen(pchIpAddress) - 1] == ']')) {
+			lenAddr = o_strlen(pchIpAddress) + 2;
 			pchAddrBrackets = o_malloc(sizeof(char) * lenAddr);
 			memset(pchAddrBrackets, 0, lenAddr);
 			o_strcpy(pchAddrBrackets, "[");
-			strcat(pchAddrBrackets, pchIpAddr);
+			strcat(pchAddrBrackets, pchIpAddress);
 
 			return pchAddrBrackets;
 
-	} else if ((pchIpAddr[0] == '[') && (pchIpAddr[o_strlen(pchIpAddr) - 1] != ']')) {
-			lenAddr = o_strlen(pchIpAddr) + 2;
+	} else if ((pchIpAddress[0] == '[') && (pchIpAddress[o_strlen(pchIpAddress) - 1] != ']')) {
+			lenAddr = o_strlen(pchIpAddress) + 2;
 			pchAddrBrackets = o_malloc(sizeof(char) * lenAddr);
 			memset(pchAddrBrackets, 0, lenAddr);
-			o_strcpy(pchAddrBrackets, pchIpAddr);
+			o_strcpy(pchAddrBrackets, pchIpAddress);
 			strcat(pchAddrBrackets, "]");
 
 			return pchAddrBrackets;
 	} else {
-		return pchIpAddr;
+		return pchIpAddress;
 	}
 }
 
@@ -501,21 +511,9 @@ E_PROTOCOL_MODE ntw_get_protocol_mode(struct _db_connection *pConnDB) {
 	return dwMode;
 }
 
-int ntw_is_valid_IPv4_addr(char *pchInterfaceName) {
+int ntw_is_valid_IPv4_addr(char *pchInterface) {
 
-  char *pchIPAddress = ntw_get_if_addr(pchInterfaceName, AF_INET);
-
-  if (pchIPAddress) {
-    o_free(pchIPAddress);
-  	return 1;
-  } else {
-  	return 0;
-  }
-}
-
-int ntw_is_valid_IPv6_addr(char *pchInterfaceName) {
-
-  char *pchIPAddress = ntw_get_if_addr(pchInterfaceName, AF_INET6);
+  char *pchIPAddress = ntw_get_if_addr(pchInterface, AF_INET);
 
   if (pchIPAddress) {
     o_free(pchIPAddress);
@@ -525,15 +523,27 @@ int ntw_is_valid_IPv6_addr(char *pchInterfaceName) {
   }
 }
 
-int ntw_is_IPv4_duplicated(char *pchInterfaceName) {
+int ntw_is_valid_IPv6_addr(char *pchInterface) {
+
+  char *pchIPAddress = ntw_get_if_addr(pchInterface, AF_INET6);
+
+  if (pchIPAddress) {
+    o_free(pchIPAddress);
+  	return 1;
+  } else {
+  	return 0;
+  }
+}
+
+int ntw_is_IPv4_duplicated(char *pchInterface) {
 
   char *pchIPAddress, *pchCmdDuplicate;
   int statusDuplicate, status;
 
   status = 0;
-  pchIPAddress = ntw_get_if_addr(pchInterfaceName, AF_INET);
+  pchIPAddress = ntw_get_if_addr(pchInterface, AF_INET);
   if (pchIPAddress) {
-    pchCmdDuplicate = msprintf(ARPING_COMMAND, pchInterfaceName, pchIPAddress);
+    pchCmdDuplicate = msprintf(ARPING_COMMAND, pchInterface, pchIPAddress);
   	statusDuplicate = system(pchCmdDuplicate);
   	if (statusDuplicate == 256) {
   		status = 1;

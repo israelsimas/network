@@ -135,46 +135,196 @@ typedef enum {
  * INTERNAL CALL FUNCTIONS
  **************************************************************************/
 
+/**
+ * Retrieves one or more parameters from the System Resources file.
+ *
+ * @param pchInterface pointer to interface name.
+ * @param isUpper determine if returns in UPPER mode.
+ *
+ * @return pointer that contais MAC address.
+ */
 char *ntw_get_mac(char *pchInterface, int isUpper);
 
-char *ntw_get_if_addr(char *pchInterface, int typeINET);
+/**
+ * Retrieves one or more parameters from the System Resources file.
+ *
+ * @param pchInterface pointer to interface name.
+ * @param isIPv6 get address in IPv6?.
+ *
+ * @return pointer that contais ip address.
+ */
+char *ntw_get_if_addr(char *pchInterface, int isIPv6);
 
-char *ntw_get_mask_addr(char *pchInterface, int typeINET);
+/**
+ * Retrieves mask address from a interface.
+ *
+ * @param pchInterface pointer to interface name.
+ * @param isIPv6 get address in IPv6?.
+ *
+ * @return pointer that contais mask address.
+ */
+char *ntw_get_mask_addr(char *pchInterface, int isIPv6);
 
+/**
+ * Retrieves gateway address from a interface.
+ *
+ * @param pchInterface pointer to interface name.
+ * @param isIPv6 get address in IPv6?.
+ *
+ * @return pointer that contais gateway address.
+ */
 char *ntw_get_if_gateway(char *pchInterface, int isIPv6);
 
+/**
+ * Retrieves DNS primary and DNS secondary address.
+ *
+ * @param ppchDns1 pointer of pointer (output parameter).
+ * @param ppchDns2 pointer of pointer (output parameter).
+ * @param isIPv6 get address in IPv6?.
+ *
+ * @return pointer that contais dns.
+ */
 void ntw_get_dns_servers(char **ppchDns1, char **ppchDns2, int isIPv6);
 
+/**
+ * Retrieves IP adrres from a hotname.
+ *
+ * @param pdwAddr pointer integer convertion of addres resolved.
+ * @param pchName pointer to a name to be resolved.
+ *
+ * @return status if was possible convert address.
+ */
 long ntw_get_host_addr(unsigned long *pdwAddr, char *pchName);
 
-char *ntw_addr_IPv6_brackets(char *pchIpAddr);
+/**
+ * Set ip addres in format [IPV6] with brackets.
+ *
+ * @param pchIpAddress pointer to ip address.
+ *
+ * @return pointer to a configured ip address.
+ */
+char *ntw_addr_IPv6_brackets(char *pchIpAddress);
 
+/**
+ * Remove bracket from a ip addres.
+ *
+ * @param pchIpAddress pointer to ip address.
+ *
+ * @return pointer to a configured ip address.
+ */
 char *ntw_remove_brackets_addr(char *pchIpAddress);
 
+/**
+ * Retrieves IP adrres type.
+ *
+ * @param pchIpAddress pointer to ip address.
+ *
+ * @return E_IP_ADDR_TYPE.
+ */
 E_IP_ADDR_TYPE ntw_get_IPAddr_type(char *pchIpAddress);
 
+/**
+ * Retrieves interface ip address aquisition type (static or dhcp).
+ *
+ * @param pchInterface pointer to interface name.
+ * @param isIPv6 get address in IPv6?.
+ * @param pConnDB pointer do database.
+ *
+ * @return aquisition type.
+ */
 int ntw_get_interface_type(char *pchInterface, int isIPv6, struct _db_connection *pConnDB);
 
+/**
+ * Check if interface IP is local (fe80).
+ *
+ * @param pchInterfaceIP pointer to interface ip address.
+ *
+ * @return boolean indicate if is local address.
+ */
 int ntw_is_local_addr_ipv6(char *pchInterfaceIP);
 
+/**
+ * Check if WAN interface is connected on cable.
+ *
+ * @param pchInterfaceIP pointer to interface ip address.
+ *
+ * @return boolean indicate if is local address.
+ */
 int ntw_is_WAN_connected();
 
+/**
+ * Check if curret interface on WAN has a valid IP address.
+ *
+ * @param pConnDB pointer do database.
+ *
+ * @return boolean indicate if is valid.
+ */
 int ntw_get_WAN_status(struct _db_connection *pConnDB);
 
+/**
+ * Retrieves protocol mode (IPV4, IPv6 or both).
+ *
+ * @param pConnDB pointer do database.
+ *
+ * @return protocol mode.
+ */
 E_PROTOCOL_MODE ntw_get_protocol_mode(struct _db_connection *pConnDB);
 
-int ntw_is_valid_IPv4_addr(char *pchInterfaceName);
+/**
+ * Check if curret interface has a valid IPv4.
+ *
+ * @param pchInterface pointer to interface name.
+ *
+ * @return boolean indicate if is valid.
+ */
+int ntw_is_valid_IPv4_addr(char *pchInterface);
 
-int ntw_is_valid_IPv6_addr(char *pchInterfaceName);
+/**
+ * Check if curret interface has a valid IPv6.
+ *
+ * @param pchInterface pointer to interface name.
+ *
+ * @return boolean indicate if is valid.
+ */
+int ntw_is_valid_IPv6_addr(char *pchInterface);
 
-int ntw_is_IPv4_duplicated(char *pchInterfaceName);
+/**
+ * Check if curret interface has a duplicate IPv4 (arp verification).
+ *
+ * @param pchInterface pointer to interface name.
+ *
+ * @return boolean indicate if is duplicate.
+ */
+int ntw_is_IPv4_duplicated(char *pchInterface);
 
+/**
+ * Retrieves current interface active.
+ *
+ * @param pConnDB pointer do database.
+ *
+ * @return type (WAN, VLAN or AUTO_VLAN).
+ */
 E_INTERFACE_TYPE ntw_get_active_interface(struct _db_connection *pConnDB);
 
+/**
+ * Retrieves current interface active name.
+ *
+ * @param pConnDB pointer do database.
+ *
+ * @return pointer to interface name.
+ */
 char *ntw_get_active_interface_name(struct _db_connection *pConnDB);
 
+/**
+ * Check if cable is connected on WAN interface.
+ *
+ * @return boolean indicate if cable is connected.
+ */
 E_CABLE_STATUS ntw_get_cable_status();
 
+/**
+ * Command to restart network script.
+ */
 void ntw_restart_network();
 
 #endif
