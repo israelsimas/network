@@ -32,7 +32,7 @@ char *ntw_get_mac(char *pchInterface, int isUpper) {
     return pchMAC; 
   }
 
-  pchCommand = msprintf("/sbin/ifconfig %s | grep -o -E '([[:xdigit:]]{1,2}:){5}[[:xdigit:]]{1,2}'", pchInterface);
+  pchCommand = msprintf(MAC_COMMAND, pchInterface);
   pf = popen(pchCommand, "r");
   o_free(pchCommand);
 	if (pf) {
@@ -61,6 +61,7 @@ char *ntw_get_mac(char *pchInterface, int isUpper) {
 }
 
 char *ntw_get_if_addr(char *pchInterface, int typeINET) {
+
 	struct ifaddrs *ifap, *ifa;
   char pchAddr[INET6_ADDRSTRLEN];
   char *pchIpAddr = NULL;
@@ -89,6 +90,7 @@ char *ntw_get_if_addr(char *pchInterface, int typeINET) {
 }
 
 char *ntw_get_mask_addr(char *pchInterface, int typeINET) {
+
 	struct ifaddrs *ifap, *ifa;
   char *pchAddr = NULL;
 
@@ -131,11 +133,11 @@ char *ntw_get_if_gateway(char *pchInterface, int isIPv6) {
 	FILE *pf;
 
   if (isIPv6) {
-    char *pchComand = msprintf("/sbin/ifconfig %s | ip -6 addr | grep 'inet6 ' | grep 'scope link' | head -1 | awk '{ print $2}'", pchInterface);
+    char *pchComand = msprintf(GATEWAY_COMMAND, pchInterface);
     pf = popen(pchComand, "r");
     o_free(pchComand);    
   } else {
-    pf = popen("/sbin/ip route list table default | awk '/default/ { print $3 }'", "r");
+    pf = popen(GATEWAY_DEFAULT_COMMAND, "r");
   }
 
 	if (pf) {
@@ -155,14 +157,15 @@ char *ntw_get_if_gateway(char *pchInterface, int isIPv6) {
 }
 
 void ntw_get_dns_servers(char **ppchDns1, char **ppchDns2, int isIPv6) {
+
   FILE *pf;
   char line[MAX_LINE_FILE_DNS] , *pchDNS;
   int bDNS1 = 1;
 
   if (isIPv6) {
-    pf = popen("cat /etc/resolvIPv6.conf", "r");  
+    pf = popen(RESOLV_IPv6_COMMAND, "r");  
   } else {
-    pf = popen("cat /etc/resolvIPv4.conf", "r");
+    pf = popen(RESOLV_IPv4_COMMAND, "r");
   }
 
   if (!pf) {
@@ -193,6 +196,7 @@ void ntw_get_dns_servers(char **ppchDns1, char **ppchDns2, int isIPv6) {
 }
 
 long ntw_get_host_addr(unsigned long *pdwAddr, char *pchName) {
+
 	long status = 0;
 	unsigned long dwAddr;
 
@@ -396,7 +400,7 @@ int ntw_is_WAN_connected() {
 
   FILE *fp;
   int handleFile, bConnected;
-  char pchStatusFile[100];
+  char pchStatusFile[SIZE_STR_STATUS_FILE];
   char pchData[SIZE_DATA_WAN] = {'\0'};
 
   bConnected = 1;
@@ -443,7 +447,7 @@ int ntw_get_WAN_status(struct _db_connection *pConnDB) {
     bVLANAutoConfigured = 0;
     o_free(pchIpAddr);
 
-    if (db_query_select(pConnDB, "SELECT VLANActivate, VLANTrafficEnableSIP, VLANTrafficEnableRTP, VLANAutoEnable, VLANAutoConfigured, VLANAutoID from TAB_NET_VLAN", &result) == DATABASE_OK) {
+    if (db_query_select(pConnDB, SELECT_VLAN_PARAMS, &result) == DATABASE_OK) {
       int numColumn = 0;
 
       db_get_result(result, numColumn++, &bVlanActive);
@@ -488,7 +492,7 @@ E_PROTOCOL_MODE ntw_get_protocol_mode(struct _db_connection *pConnDB) {
 	struct _db_result result;
 	unsigned long dwMode = PROT_MODE_IPV4;
 
-  if (db_query_select(pConnDB, "SELECT ETHProtocolMode from TAB_NET_ETH_WAN", &result) == DATABASE_OK) {
+  if (db_query_select(pConnDB, SELECT_ETH_MODE, &result) == DATABASE_OK) {
     int numColumn = 0;
 
     db_get_result(result, numColumn++, &dwMode);
@@ -498,9 +502,9 @@ E_PROTOCOL_MODE ntw_get_protocol_mode(struct _db_connection *pConnDB) {
 }
 
 int ntw_is_valid_IPv4_addr(char *pchInterfaceName) {
-  char *pchIPAddress;
 
-  pchIPAddress = ntw_get_if_addr(pchInterfaceName, AF_INET);
+  char *pchIPAddress = ntw_get_if_addr(pchInterfaceName, AF_INET);
+
   if (pchIPAddress) {
     o_free(pchIPAddress);
   	return 1;
@@ -510,9 +514,9 @@ int ntw_is_valid_IPv4_addr(char *pchInterfaceName) {
 }
 
 int ntw_is_valid_IPv6_addr(char *pchInterfaceName) {
-  char *pchIPAddress;
 
-  pchIPAddress = ntw_get_if_addr(pchInterfaceName, AF_INET6);
+  char *pchIPAddress = ntw_get_if_addr(pchInterfaceName, AF_INET6);
+
   if (pchIPAddress) {
     o_free(pchIPAddress);
   	return 1;
@@ -522,6 +526,7 @@ int ntw_is_valid_IPv6_addr(char *pchInterfaceName) {
 }
 
 int ntw_is_IPv4_duplicated(char *pchInterfaceName) {
+
   char *pchIPAddress, *pchCmdDuplicate;
   int statusDuplicate, status;
 
@@ -553,11 +558,11 @@ E_INTERFACE_TYPE ntw_get_active_interface(struct _db_connection *pConnDB) {
     return eIfType;
   }
 
-  bVlanActive = 0;
-  bVlanAutoEnable = 0;
+  bVlanActive         = 0;
+  bVlanAutoEnable     = 0;
   bVlanAutoConfigured = 0;
 	
-  if (db_query_select(pConnDB, "SELECT VLANActivate, VLANAutoEnable, VLANAutoConfigured from TAB_NET_ETH_WAN", &result) == DATABASE_OK) {
+  if (db_query_select(pConnDB, SELECT_WAN_PARAMS, &result) == DATABASE_OK) {
     int numColumn = 0;
 
     db_get_result(result, numColumn++, &bVlanActive);
@@ -588,7 +593,7 @@ char *ntw_get_active_interface_name(struct _db_connection *pConnDB) {
 
     case IF_VLAN: {
       struct _db_result result;
-      if (db_query_select(pConnDB, "SELECT VLANID from TAB_NET_ETH_WAN", &result) == DATABASE_OK) {
+      if (db_query_select(pConnDB, SELECT_VLANID, &result) == DATABASE_OK) {
         int vlanID = 0;
 
         db_get_result(result, 0, &vlanID);
@@ -601,7 +606,7 @@ char *ntw_get_active_interface_name(struct _db_connection *pConnDB) {
 
     case IF_AUTO_VLAN: {
       struct _db_result result;
-      if (db_query_select(pConnDB, "SELECT VLANAutoID from TAB_NET_ETH_WAN", &result) == DATABASE_OK) {
+      if (db_query_select(pConnDB, SELECT_AUTO_VLANID, &result) == DATABASE_OK) {
         int vlanAutoID = 0;
 
         db_get_result(result, 0, &vlanAutoID);
@@ -621,11 +626,12 @@ char *ntw_get_active_interface_name(struct _db_connection *pConnDB) {
 }
 
 E_CABLE_STATUS ntw_get_cable_status() {
+
   FILE *pf;
   int handleFile, cableConn;
   char pchCableStatus[MAX_LENGTH_CABLE_STATUS];
   
-  pf = popen("cat /tmp/port_wan", "r");  
+  pf = popen(WAN_STATUS_COMMAND, "r");  
   if (!pf) {
     return CABLE_DISCONNECTED;
   }

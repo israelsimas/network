@@ -17,47 +17,59 @@
  * DEFINITIONS
  **************************************************************************/
 
-#define SIZE_STR_MAC        40
-#define SIZE_STR_GATEWAY    40
-#define SIZE_MAX_MASK       50
-#define MAX_LINE_FILE_DNS   200
+#define SIZE_STR_MAC              40
+#define SIZE_STR_GATEWAY          40
+#define SIZE_MAX_MASK             50
+#define MAX_LINE_FILE_DNS         200
 
 #define MAX_LENGTH_ETH_STATUS 		25
 #define MAX_LENGHT_CMD_DUPL				60
 #define SIZE_STR_IPV6      				50
+#define SIZE_STR_STATUS_FILE      100
+#define SIZE_DATA_WAN             25
 
 #define CMD_RESTART_NETWORK 			"/etc/init.d/network restart"
 
 #define ARPING_COMMAND					  "arping -D -I %s -c 2 %s"
+#define MAC_COMMAND               "/sbin/ifconfig %s | grep -o -E '([[:xdigit:]]{1,2}:){5}[[:xdigit:]]{1,2}'"
+#define GATEWAY_COMMAND           "/sbin/ifconfig %s | ip -6 addr | grep 'inet6 ' | grep 'scope link' | head -1 | awk '{ print $2}'"
+#define GATEWAY_DEFAULT_COMMAND   "/sbin/ip route list table default | awk '/default/ { print $3 }'"
+#define RESOLV_IPv4_COMMAND       "cat /etc/resolvIPv4.conf"
+#define RESOLV_IPv6_COMMAND       "cat /etc/resolvIPv6.conf"
+#define WAN_STATUS_COMMAND        "cat /tmp/port_wan"
 #define IP_ADDRESS_NOT_DUPLICATED	0
 
-#define INVALID_MAC         "00:00:00:00:00:00"
-#define INVALID_IP					"0.0.0.0"
-#define DEFAULT_MASK_ADDR   "255.255.255.0"
-#define DEFAULT_GATEWY_ADDR "0.0.0.0"
+#define INVALID_MAC               "00:00:00:00:00:00"
+#define INVALID_IP					      "0.0.0.0"
+#define DEFAULT_MASK_ADDR         "255.255.255.0"
+#define DEFAULT_GATEWY_ADDR       "0.0.0.0"
 
-#define PREFIX_LOCAL_IPV6		"fe80"
-#define IPV4_LOCAL_DEFAULT  "127.0.0.1"
-#define IPV6_LOCAL_DEFAULT	"::1"
+#define PREFIX_LOCAL_IPV6		      "fe80"
+#define IPV4_LOCAL_DEFAULT        "127.0.0.1"
+#define IPV6_LOCAL_DEFAULT	      "::1"
 
-#define NUM_MAX_RESOLV			3
-#define NAMESERVER_RESOLV		"nameserver"
-
-#define SIZE_DATA_WAN       25
+#define NUM_MAX_RESOLV			      3
+#define NAMESERVER_RESOLV		      "nameserver"
 
 #ifdef  PLATFORM_X86
-  #define PORT_WAN_STATTUS    "/tmp/port_wan"
-  #define DEFAULT_INTERFACE   "enp1s0"     // eth for Ubuntu
+  #define PORT_WAN_STATTUS        "/tmp/port_wan"
+  #define DEFAULT_INTERFACE       "enp1s0"     // eth for Ubuntu
   // #define DEFAULT_INTERFACE   "wlp3s0"  // Wireless for Ubuntu
   // #define DEFAULT_INTERFACE   "en0"     // Wireless for MAC
 #else
-  #define PORT_WAN_STATTUS    "/sys/kernel/network_status/port_wan"
-  #define DEFAULT_INTERFACE   "eth0"
+  #define PORT_WAN_STATTUS        "/sys/kernel/network_status/port_wan"
+  #define DEFAULT_INTERFACE       "eth0"
 #endif
 
 #define MAX_LENGTH_CABLE_STATUS   2
 
-#define AUTO_VLAN_VALID_FILE		"/tmp/inputValid"
+#define AUTO_VLAN_VALID_FILE		  "/tmp/inputValid"
+
+#define SELECT_VLAN_PARAMS        "SELECT VLANActivate, VLANTrafficEnableSIP, VLANTrafficEnableRTP, VLANAutoEnable, VLANAutoConfigured, VLANAutoID from TAB_NET_VLAN"
+#define SELECT_WAN_PARAMS         "SELECT VLANActivate, VLANAutoEnable, VLANAutoConfigured from TAB_NET_ETH_WAN"
+#define SELECT_ETH_MODE           "SELECT ETHProtocolMode from TAB_NET_ETH_WAN"
+#define SELECT_VLANID             "SELECT VLANID from TAB_NET_ETH_WAN"
+#define SELECT_AUTO_VLANID        "SELECT VLANAutoID from TAB_NET_ETH_WAN"
 
 /**************************************************************************
  * TYPEDEFS
