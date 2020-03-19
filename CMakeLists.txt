@@ -7,6 +7,7 @@ SET(CMAKE_SYSTEM_NAME Linux)
 if(APPLE)
   include_directories( /usr/local/include )
   link_directories( /usr/local/lib/ )
+  set(CMAKE_MACOSX_RPATH ON)
 endif()
 
 IF(PLATFORM_X86)
