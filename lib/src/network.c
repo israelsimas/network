@@ -18,6 +18,7 @@
 #include <netdb.h>
 #include <ifaddrs.h>
 #include <ctype.h>
+#include <utils.h>
 
 #define THIS_FILE "network.c"
 
@@ -170,7 +171,7 @@ void ntw_get_dns_servers(char **ppchDns1, char **ppchDns2, int isIPv6) {
 
   FILE *pf;
   char line[MAX_LINE_FILE_DNS] , *pchDNS;
-  int bDNS1 = 1;
+  bool bDNS1 = true;
 
   if (isIPv6) {
     pf = popen(RESOLV_IPv6_COMMAND, "r");  
@@ -184,7 +185,7 @@ void ntw_get_dns_servers(char **ppchDns1, char **ppchDns2, int isIPv6) {
 
   while (fgets(line , MAX_LINE_FILE_DNS , pf)) {
 
-    if(line[0] == '#') {
+    if (line[0] == '#') {
       continue;
     }
 
@@ -195,7 +196,7 @@ void ntw_get_dns_servers(char **ppchDns1, char **ppchDns2, int isIPv6) {
 
       if (pchDNS && bDNS1) {
         *ppchDns1 = o_strdup(pchDNS);
-        bDNS1 = 0;
+        bDNS1 = false;
       } else if (pchDNS) {
         *ppchDns2 = o_strdup(pchDNS);
       }
@@ -207,20 +208,20 @@ void ntw_get_dns_servers(char **ppchDns1, char **ppchDns2, int isIPv6) {
 
 long ntw_get_host_addr(unsigned long *pdwAddr, char *pchName) {
 
-	long status = 0;
+	long status = SUCCESS;
 	unsigned long dwAddr;
 
 	if (pchName == NULL) {
-		status = -1;
+		status = ERROR;
 	} else if (inet_pton(AF_INET, pchName, (struct in_addr *) &dwAddr) == 1) {
-		printf("getHostAddr: %s, %lx", pchName, dwAddr);
+		log("getHostAddr: %s, %lx", pchName, dwAddr);
 	} else {
 		struct hostent *pHost;
 		char hostip[INET_ADDRSTRLEN];
 
 		pHost = gethostbyname(pchName);
 		if (pHost == NULL) {
-			printf("getHostAddr() - can't gethostbyname(%s)", pchName);
+			log_error("getHostAddr() - can't gethostbyname(%s)", pchName);
 			status = -1;
 		} else {
 			/* the reason using these inverse operation is that they correctly
@@ -228,14 +229,14 @@ long ntw_get_host_addr(unsigned long *pdwAddr, char *pchName) {
 			 */
 			inet_ntop(AF_INET, pHost->h_addr_list[0], hostip, INET_ADDRSTRLEN);
 			if (inet_pton(AF_INET, hostip, (struct in_addr *) &dwAddr) != 1) {
-				status = -1;
-				printf("getHostAddr: %s -> %s, %lx", pchName, hostip, dwAddr);
+				status = ERROR;
+				log("getHostAddr: %s -> %s, %lx", pchName, hostip, dwAddr);
 			}
 		}
 	}
 
 	if (dwAddr == 0) {
-		status = -1;
+		status = ERROR;
 	} else {
 		*pdwAddr = ntohl(dwAddr);
 	}
@@ -324,8 +325,8 @@ E_IP_ADDR_TYPE ntw_get_IPAddr_type(char *pchIpAddress) {
 		return IP_ADDR_TYPE_IPV6;
 	}
 
-	bHasIPv4 = 0;
-	bHasIPv6 = 0;
+	bHasIPv4 = false;
+	bHasIPv6 = false;
 
 	pResult = NULL;
 	memset(&hint, 0, sizeof hint);
@@ -339,9 +340,9 @@ E_IP_ADDR_TYPE ntw_get_IPAddr_type(char *pchIpAddress) {
 
 	for (pResultIP = pResult; pResultIP != NULL; pResultIP = pResultIP->ai_next) {
 		if (pResultIP->ai_family == AF_INET) {
-			bHasIPv4 = 1;
+			bHasIPv4 = true;
 		} else if (pResultIP->ai_family == AF_INET6) {
-			bHasIPv6 = 1;
+			bHasIPv6 = true;
 		}
 	}
 
@@ -381,7 +382,7 @@ int ntw_get_interface_type(char *pchInterface, int isIPv6, struct _db_connection
     }
   }
 
-  pchQuery = msprintf("SELECT GROUP_CONCAT( %s, ',' ) as dhcp FROM %s", pchParamDHCP, pchTable);
+  pchQuery = msprintf(SELECT_GROUP_DHCP, pchParamDHCP, pchTable);
   if (db_query_select(pConnDB, pchQuery, &result) == DATABASE_OK) {
     if (result.nb_rows == 1 && result.nb_columns == 1) {
       interfaceType = ((struct _db_type_int *)result.data[0][0].t_data)->value;
@@ -395,7 +396,7 @@ int ntw_get_interface_type(char *pchInterface, int isIPv6, struct _db_connection
 
 int ntw_is_local_addr_Ipv6(char *pchInterfaceIP) {
 
-  int bIsLocalAddr = 0;
+  int bIsLocalAddr = false;
 
   if (pchInterfaceIP) {
     size_t lenpre = strlen(PREFIX_LOCAL_IPV6),
@@ -406,14 +407,14 @@ int ntw_is_local_addr_Ipv6(char *pchInterfaceIP) {
   return bIsLocalAddr;
 }
 
-int ntw_is_WAN_connected() {
+bool ntw_is_WAN_connected() {
 
   FILE *fp;
   int handleFile, bConnected;
   char pchStatusFile[SIZE_STR_STATUS_FILE];
   char pchData[SIZE_DATA_WAN] = {'\0'};
 
-  bConnected = 1;
+  bConnected = true;
   sprintf(pchStatusFile, PORT_WAN_STATTUS);
 
   fp = fopen(pchStatusFile, "r");
@@ -425,9 +426,9 @@ int ntw_is_WAN_connected() {
 
   if (fread(pchData, sizeof(char), SIZE_DATA_WAN, fp) > 0) {
     if (o_strstr(pchData, "1")) {
-      bConnected = 1;
+      bConnected = true;
     } else {
-      bConnected = 0;
+      bConnected = false;
     }
   }
 
@@ -511,44 +512,45 @@ E_PROTOCOL_MODE ntw_get_protocol_mode(struct _db_connection *pConnDB) {
 	return dwMode;
 }
 
-int ntw_is_valid_IPv4_addr(char *pchInterface) {
+bool ntw_is_valid_IPv4_addr(char *pchInterface) {
 
   char *pchIPAddress = ntw_get_if_addr(pchInterface, AF_INET);
 
   if (pchIPAddress) {
     o_free(pchIPAddress);
-  	return 1;
+  	return true;
   } else {
-  	return 0;
+  	return false;
   }
 }
 
-int ntw_is_valid_IPv6_addr(char *pchInterface) {
+bool ntw_is_valid_IPv6_addr(char *pchInterface) {
 
   char *pchIPAddress = ntw_get_if_addr(pchInterface, AF_INET6);
 
   if (pchIPAddress) {
     o_free(pchIPAddress);
-  	return 1;
+  	return true;
   } else {
-  	return 0;
+  	return false;
   }
 }
 
-int ntw_is_IPv4_duplicated(char *pchInterface) {
+bool ntw_is_IPv4_duplicated(char *pchInterface) {
 
   char *pchIPAddress, *pchCmdDuplicate;
-  int statusDuplicate, status;
+  int statusDuplicate;
+  bool status;
 
-  status = 0;
+  status = false;
   pchIPAddress = ntw_get_if_addr(pchInterface, AF_INET);
   if (pchIPAddress) {
     pchCmdDuplicate = msprintf(ARPING_COMMAND, pchInterface, pchIPAddress);
   	statusDuplicate = system(pchCmdDuplicate);
   	if (statusDuplicate == 256) {
-  		status = 1;
+  		status = true;
   	} else {
-  		status = 0;
+  		status = false;
   	}
   }
 
@@ -568,9 +570,9 @@ E_INTERFACE_TYPE ntw_get_active_interface(struct _db_connection *pConnDB) {
     return eIfType;
   }
 
-  bVlanActive         = 0;
-  bVlanAutoEnable     = 0;
-  bVlanAutoConfigured = 0;
+  bVlanActive         = false;
+  bVlanAutoEnable     = false;
+  bVlanAutoConfigured = false;
 	
   if (db_query_select(pConnDB, SELECT_WAN_PARAMS, &result) == DATABASE_OK) {
     int numColumn = 0;

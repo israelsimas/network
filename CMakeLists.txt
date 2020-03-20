@@ -20,7 +20,7 @@ file(GLOB sources "lib/src/*.c" )
 
 add_library(network SHARED ${sources} ${headers})
 
-target_link_libraries( network orcania database )
+target_link_libraries( network utils orcania database )
 
 set (VERSION 1.0.0)
 add_definitions (-DCMAKE -DVERSION=\"${VERSION}\")

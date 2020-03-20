@@ -12,6 +12,7 @@
 #define __NETWORK_H__
 
 #include <database.h>
+#include <standard-types.h>
 
 /**************************************************************************
  * DEFINITIONS
@@ -70,6 +71,7 @@
 #define SELECT_ETH_MODE           "SELECT ETHProtocolMode from TAB_NET_ETH_WAN"
 #define SELECT_VLANID             "SELECT VLANID from TAB_NET_ETH_WAN"
 #define SELECT_AUTO_VLANID        "SELECT VLANAutoID from TAB_NET_ETH_WAN"
+#define SELECT_GROUP_DHCP         "SELECT GROUP_CONCAT( %s, ',' ) as dhcp FROM %s"
 
 /**************************************************************************
  * TYPEDEFS
@@ -250,7 +252,7 @@ int ntw_is_local_addr_ipv6(char *pchInterfaceIP);
  *
  * @return boolean indicate if is local address.
  */
-int ntw_is_WAN_connected();
+bool ntw_is_WAN_connected();
 
 /**
  * Check if curret interface on WAN has a valid IP address.
@@ -277,7 +279,7 @@ E_PROTOCOL_MODE ntw_get_protocol_mode(struct _db_connection *pConnDB);
  *
  * @return boolean indicate if is valid.
  */
-int ntw_is_valid_IPv4_addr(char *pchInterface);
+bool ntw_is_valid_IPv4_addr(char *pchInterface);
 
 /**
  * Check if curret interface has a valid IPv6.
@@ -286,7 +288,7 @@ int ntw_is_valid_IPv4_addr(char *pchInterface);
  *
  * @return boolean indicate if is valid.
  */
-int ntw_is_valid_IPv6_addr(char *pchInterface);
+bool ntw_is_valid_IPv6_addr(char *pchInterface);
 
 /**
  * Check if curret interface has a duplicate IPv4 (arp verification).
@@ -295,7 +297,7 @@ int ntw_is_valid_IPv6_addr(char *pchInterface);
  *
  * @return boolean indicate if is duplicate.
  */
-int ntw_is_IPv4_duplicated(char *pchInterface);
+bool ntw_is_IPv4_duplicated(char *pchInterface);
 
 /**
  * Retrieves current interface active.
