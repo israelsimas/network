@@ -11,6 +11,10 @@
 #ifndef __NETWORK_H__
 #define __NETWORK_H__
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <database.h>
 #include <standard-types.h>
 
@@ -328,5 +332,9 @@ E_CABLE_STATUS ntw_get_cable_status();
  * Command to restart network script.
  */
 void ntw_restart_network();
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif
