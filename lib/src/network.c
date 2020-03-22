@@ -439,7 +439,7 @@ bool ntw_is_WAN_connected() {
 
 int ntw_get_WAN_status(struct _db_connection *pConnDB) {
 
-  char *pchIpAddr = ntw_get_if_addr(DEFAULT_INTERFACE, AF_INET);
+  char *pchIpAddr = ntw_get_if_addr(DEFAULT_INTERFACE, false);
 
   if (pchIpAddr && (o_strcmp(pchIpAddr, INVALID_IP) != 0)) {
 
@@ -472,7 +472,7 @@ int ntw_get_WAN_status(struct _db_connection *pConnDB) {
     if (bVlanActive) {
 
       pchInterface = msprintf("%s.%d", DEFAULT_INTERFACE, VlanSIP);
-      pchIpAddr    = ntw_get_if_addr(pchInterface, AF_INET);
+      pchIpAddr    = ntw_get_if_addr(pchInterface, false);
       o_free(pchInterface);
       if (pchIpAddr && (strcmp(pchIpAddr, INVALID_IP) != 0)) {
         o_free(pchIpAddr);
@@ -484,7 +484,7 @@ int ntw_get_WAN_status(struct _db_connection *pConnDB) {
     } else if (bVLANAutoEnable && bVLANAutoConfigured) {
 
       pchInterface = msprintf("%s.%d", DEFAULT_INTERFACE, VLANAutoID);
-      pchIpAddr = ntw_get_if_addr(DEFAULT_INTERFACE, AF_INET);
+      pchIpAddr = ntw_get_if_addr(DEFAULT_INTERFACE, false);
       o_free(pchInterface);
       if (pchIpAddr && (o_strcmp(pchIpAddr, INVALID_IP) != 0)) {
         o_free(pchIpAddr);
@@ -514,7 +514,7 @@ E_PROTOCOL_MODE ntw_get_protocol_mode(struct _db_connection *pConnDB) {
 
 bool ntw_is_valid_IPv4_addr(char *pchInterface) {
 
-  char *pchIPAddress = ntw_get_if_addr(pchInterface, AF_INET);
+  char *pchIPAddress = ntw_get_if_addr(pchInterface, false);
 
   if (pchIPAddress) {
     o_free(pchIPAddress);
@@ -526,7 +526,7 @@ bool ntw_is_valid_IPv4_addr(char *pchInterface) {
 
 bool ntw_is_valid_IPv6_addr(char *pchInterface) {
 
-  char *pchIPAddress = ntw_get_if_addr(pchInterface, AF_INET6);
+  char *pchIPAddress = ntw_get_if_addr(pchInterface, true);
 
   if (pchIPAddress) {
     o_free(pchIPAddress);
@@ -543,7 +543,7 @@ bool ntw_is_IPv4_duplicated(char *pchInterface) {
   bool status;
 
   status = false;
-  pchIPAddress = ntw_get_if_addr(pchInterface, AF_INET);
+  pchIPAddress = ntw_get_if_addr(pchInterface, false);
   if (pchIPAddress) {
     pchCmdDuplicate = msprintf(ARPING_COMMAND, pchInterface, pchIPAddress);
   	statusDuplicate = system(pchCmdDuplicate);
